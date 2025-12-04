@@ -7,7 +7,7 @@ import "./EditProduct.css";
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, categories, loadCategories,loadProducts } = useContext(ProductContext);
+  const { user, categories = [], loadCategories, loadProducts } = useContext(ProductContext);
 
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
@@ -19,25 +19,24 @@ const EditProduct = () => {
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
-    loadCategories();
-  }, []);
+    if (typeof loadCategories === "function") loadCategories();
+  }, [loadCategories]);
 
   useEffect(() => {
     const loadProduct = async () => {
       const res = await api.get(`/Product/${id}`);
-      const p = res.data;
+      const p = res.data || {};
 
-      setName(p.productName);
-      setDesc(p.description);
-      setPrice(String(p.price));
-      setCategoryId(String(p.categoryId));
+      setName(p.productName || "");
+      setDesc(p.description || "");
+      setPrice(p.price != null ? String(p.price) : "");
+      setCategoryId(p.categoryId != null ? String(p.categoryId) : "");
 
       if (p.imageUrl?.startsWith("/")) {
         setExistingImage(`https://localhost:7189${p.imageUrl}`);
       } else {
-        setExistingImage(p.imageUrl);
+        setExistingImage(p.imageUrl || null);
       }
-
     };
 
     loadProduct();
@@ -51,7 +50,7 @@ const EditProduct = () => {
     const formData = new FormData();
     formData.append("ProductName", name);
     formData.append("Description", desc);
-    formData.append("Price",Number(price));
+    formData.append("Price", Number(price));
     formData.append("CategoryId", Number(categoryId));
 
     if (newImage) {
@@ -60,42 +59,33 @@ const EditProduct = () => {
 
     await api.put(`/Product/Update/${id}`, formData); 
     alert("Product Updated Successfully!");
-    await loadProducts();
+    if (typeof loadProducts === "function") await loadProducts();
     setTimeout(()=>navigate("/admin"),100);
   };
 
   return (
     <>
-    <div className="back-btn-container">
-    <button onClick={() => navigate(-1)} className="back-btn">
-      ← Back
-    </button>
-    </div>
+      <div className="back-btn-container">
+        <button onClick={() => navigate(-1)} className="back-btn">
+          ← Back
+        </button>
+      </div>
       <main className="edit-wrapper">
         <div className="edit-card">
           <h2>Edit Product</h2>
 
           <form className="edit-form" onSubmit={handleUpdate}>
-            <label>Product Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} required />
+            <label htmlFor="edit-name">Product Name</label>
+            <input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
 
-            <label>Description</label>
-            <textarea value={desc} onChange={(e) => setDesc(e.target.value)} required />
+            <label htmlFor="edit-desc">Description</label>
+            <textarea id="edit-desc" value={desc} onChange={(e) => setDesc(e.target.value)} required />
 
-            <label>Price</label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-            />
+            <label htmlFor="edit-price">Price</label>
+            <input id="edit-price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
 
-            <label>Category</label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              required
-            >
+            <label htmlFor="edit-category">Category</label>
+            <select id="edit-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
               <option value="">Select Category</option>
               {categories.map((c) => (
                 <option key={c.categoryId} value={c.categoryId}>
@@ -109,8 +99,9 @@ const EditProduct = () => {
               <img src={existingImage} alt="Old" className="preview-img" />
             )}
 
-            <label>Replace Image</label>
+            <label htmlFor="edit-new-image">Replace Image</label>
             <input
+              id="edit-new-image"
               type="file"
               accept="image/*"
               onChange={(e) => {

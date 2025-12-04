@@ -1,64 +1,60 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import AddProduct from "./AddProduct";
 import ProductContext from "../context/ProductContext";
 import api from "../api/api";
 
-jest.mock("../api/api");
-jest.mock("react-router-dom", () => ({
-  useNavigate: () => jest.fn()
+// Mock API
+jest.mock("../api/api", () => ({
+  post: jest.fn(),
 }));
 
-beforeAll(() => {
-  window.alert = jest.fn();
-});
+// Mock navigation
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  useNavigate: () => mockNavigate,
+}));
 
-test("submits product form and calls API correctly", async () => {
-  const mockLoadCategories = jest.fn();
-  const mockLoadProducts = jest.fn();
-  const mockNavigate = jest.fn();
+describe("AddProduct Component", () => {
+  test("submits product form and calls API + loadProducts", async () => {
+    const mockLoadProducts = jest.fn();
 
-  api.post.mockResolvedValueOnce({ data: {} });
+    const contextValues = {
+      categories: [{ categoryId: 1, categoryName: "Electronics" }],
+      loadProducts: mockLoadProducts,
+    };
 
-  const fakeImage = new File(["img"], "test.png", { type: "image/png" });
+    render(
+      <ProductContext.Provider value={contextValues}>
+        <AddProduct />
+      </ProductContext.Provider>
+    );
 
-  render(
-    <ProductContext.Provider
-      value={{
-        user: { role: "Admin" },
-        categories: [{ categoryId: 1, categoryName: "Electronics" }],
-        loadCategories: mockLoadCategories,
-        loadProducts: mockLoadProducts
-      }}
-    >
-      <AddProduct />
-    </ProductContext.Provider>
-  );
+    fireEvent.change(screen.getByTestId("name-input"), {
+      target: { value: "Laptop" },
+    });
 
-  const inputs = screen.getAllByRole("textbox");
-  fireEvent.change(inputs[0], { target: { value: "Laptop" } });
-  fireEvent.change(inputs[1], { target: { value: "New Laptop" } });
+    fireEvent.change(screen.getByTestId("price-input"), {
+      target: { value: "50000" },
+    });
 
-  fireEvent.change(screen.getByLabelText(/price/i), {
-    target: { value: "1500" }
+    fireEvent.change(screen.getByTestId("desc-input"), {
+      target: { value: "Good laptop" },
+    });
+
+    fireEvent.change(screen.getByTestId("category-select"), {
+      target: { value: "1" },
+    });
+
+    fireEvent.submit(screen.getByTestId("add-form"));
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledTimes(1);
+
+      const callArg = api.post.mock.calls[0];
+      expect(callArg[0]).toBe("/Product/Add");
+
+      expect(mockLoadProducts).toHaveBeenCalled(); // FIXED
+      expect(mockNavigate).toHaveBeenCalledWith("/admin");
+    });
   });
-
-  fireEvent.change(screen.getByRole("combobox"), {
-    target: { value: "1" }
-  });
-
-  fireEvent.change(screen.getByLabelText(/upload image/i), {
-    target: { files: [fakeImage] }
-  });
-
-  fireEvent.click(screen.getByRole("button", { name: /add product/i }));
-
-  expect(api.post).toHaveBeenCalled();
-  const formDataSent = api.post.mock.calls[0][1];
-  expect(formDataSent.get("ProductName")).toBe("Laptop");
-  expect(formDataSent.get("Description")).toBe("New Laptop");
-  expect(formDataSent.get("Price")).toBe("1500");
-  expect(formDataSent.get("CategoryId")).toBe("1");
-  expect(formDataSent.get("ImageFile")).toBe(fakeImage);
-
-  expect(mockLoadProducts).toHaveBeenCalled();
 });

@@ -2,7 +2,6 @@ import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ProductContext from "../context/ProductContext";
 import "./Signup.css";
-
 const Signup = () => {
   const { signup } = useContext(ProductContext);
 
@@ -14,9 +13,11 @@ const Signup = () => {
 
   const handle = async (e) => {
     e.preventDefault();
+
     const res = await signup(userName, email, password);
 
     if (res.ok) {
+      // keep the alert (tests will mock window.alert)
       alert("Signup successful! Please login.");
       navigate("/login");
     }
@@ -28,40 +29,37 @@ const Signup = () => {
         <h2>Signup</h2>
 
         <form onSubmit={handle}>
-          <label htmlFor="username">User Name</label>
+          <label htmlFor="signup-username">User Name</label>
           <input
-            id="username"
+            id="signup-username"
             type="text"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
             required
           />
 
-          <label htmlFor="email">Email</label>
+          <label htmlFor="signup-email">Email</label>
           <input
-            id="email"
+            id="signup-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
-          <label htmlFor="password">Password</label>
+          <label htmlFor="signup-password">Password</label>
           <input
-            id="password"
+            id="signup-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
 
-          <button className="auth-btn" type="submit">
-            Signup
-          </button>
+          <button className="auth-btn" type="submit">Signup</button>
         </form>
 
-        <p>
-          Already have an account?
+        <p>Already have an account?
           <Link to="/login"> Login</Link>
         </p>
       </div>

@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useContext } from "react";
 import ProductContext from "../context/ProductContext";
@@ -23,36 +22,49 @@ const ProductPage = () => {
 
   return (
     <>
-    <Nav />
-    <div className="back-btn-container">
-    <button onClick={() => navigate(-1)} className="back-btn">
-    ← Back
-   </button>
-   </div>
-    <main className="PostPage">
-      <article className="post">
-        <h2>{product.productName}</h2>
+      <Nav />
+      <div className="back-btn-container">
+        <button onClick={() => navigate(-1)} className="back-btn">
+          ← Back
+        </button>
+      </div>
 
-        {product.imageUrl && (
-          <img src={product.imageUrl} alt="" style={{ width: "250px", borderRadius: "10px" }} />
-        )}
+      <main className="PostPage">
+        <article className="post">
+          <h2>{product.productName}</h2>
 
-        <p>Category: {product.category?.categoryName}</p>
-        <p>Price: ₹{product.price}</p>
-        <p>Description: {product.description}</p>
+          {product.imageUrl && (
+            <img
+              src={product.imageUrl}
+              alt={product.productName}
+              style={{ width: "250px", borderRadius: "10px" }}
+            />
+          )}
 
-        {user && user.role === "Admin" && (
-          <div className="post-buttons">
-            <Link to={`/edit/${product.productId}`}>
-              <button className="editButton">Edit</button>
-            </Link>
-            <button className="deleteButton" onClick={handleRemove}>
-              Delete
-            </button>
-          </div>
-        )}
-      </article>
-    </main>
+          <p>
+            Category: <span>{product.category?.categoryName}</span>
+          </p>
+
+          <p>
+            Price: ₹<span>{product.price}</span>
+          </p>
+
+          <p>
+            Description: <span>{product.description}</span>
+          </p>
+
+          {user && user.role === "Admin" && (
+            <div className="post-buttons">
+              <Link to={`/edit/${product.productId}`}>
+                <button className="editButton">Edit</button>
+              </Link>
+              <button className="deleteButton" data-testid="delete-btn" onClick={handleRemove}>
+                Delete
+              </button>
+            </div>
+          )}
+        </article>
+      </main>
     </>
   );
 };
