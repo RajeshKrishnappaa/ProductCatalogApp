@@ -1,191 +1,164 @@
-// src/context/ProductContext.js
-import React, { createContext, useState, useEffect, useCallback } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 import api from "../api/api";
 
-const ProductContext = createContext({
-  // default values for safety (so tests/components that import context directly don't blow up)
-  user: null,
-  setUser: () => {},
-  login: async () => ({ ok: false }),
-  signup: async () => ({ ok: false }),
-  logout: () => {},
-  categories: [],
-  products: [],
-  totalProducts: 0,
-  loadCategories: async () => {},
-  loadProducts: async () => {},
-  deleteProduct: async () => {},
-  search: "",
-  setSearch: () => {},
-  categoryId: "",
-  setCategoryId: () => {},
-  priceRange: [0, 100000],
-  setPriceRange: () => {},
-  currentPage: 1,
-  setCurrentPage: () => {},
-  pageSize: 10,
-  setPageSize: () => {},
-  authError: "",
-  setAuthError: () => {},
-});
+const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
+
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
     const username = localStorage.getItem("username");
+
     return token ? { token, role, username } : null;
   });
 
-  const [categories, setCategories] = useState([]);
+  const [authError, setAuthError] = useState("");
+
   const [products, setProducts] = useState([]);
-  const [totalProducts, setTotalProducts] = useState(0);
+  const [categories, setCategories] = useState([]);
 
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [priceRange, setPriceRange] = useState([0, 100000]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(5);
+  const [totalProducts, setTotalProducts] = useState(0);
 
-  const [authError, setAuthError] = useState("");
-
-  // load categories
   const loadCategories = useCallback(async () => {
     try {
       const res = await api.get("/Category/All");
-      // defensive: ensure array
-      setCategories(res?.data ?? []);
+      setCategories(res.data);
     } catch (err) {
       console.error("Category load failed", err);
-      setCategories([]);
     }
   }, []);
 
-  // load products (paginated/filter support minimal but included)
-  const loadProducts = useCallback(
-    async (page = currentPage, size = pageSize) => {
-      try {
-        // build minimal params based on state
-        const params = {
-          page,
-          pageSize: size,
-          search,
-          categoryId,
-          minPrice: priceRange?.[0],
-          maxPrice: priceRange?.[1],
-        };
-
-        const res = await api.get("/Product/GetPaged", { params });
-        // defensive fallback
-        setProducts(res?.data?.items ?? []);
-        setTotalProducts(res?.data?.total ?? 0);
-      } catch (err) {
-        console.error("Product load failed", err);
-        setProducts([]);
-        setTotalProducts(0);
-      }
-    },
-    [currentPage, pageSize, search, categoryId, priceRange]
-  );
-
-  const deleteProduct = useCallback(
-    async (productId) => {
-      try {
-        await api.delete(`/Product/${productId}`);
-        // refresh list if possible
-        await loadProducts();
-      } catch (err) {
-        console.error("Delete product failed", err);
-      }
-    },
-    [loadProducts]
-  );
-
-  // auth actions
-  const login = useCallback(async (username, password) => {
+  const loadProducts = useCallback(async () => {
     try {
-      const res = await api.post("/User/Login", { username, password });
-      if (res?.data?.token) {
-        const token = res.data.token;
-        const role = res.data.role;
-        const uname = res.data.username || res.data.userName || username;
-        localStorage.setItem("token", token);
-        localStorage.setItem("role", role);
-        localStorage.setItem("username", uname);
-        setUser({ token, role, username: uname });
-        setAuthError("");
-        return { ok: true };
-      }
-      setAuthError("Login failed");
-      return { ok: false };
+      const res = await api.get("/Product/All", {
+        params: {
+          page: currentPage,
+          pageSize,
+          q: search || null,
+          categoryId: categoryId || null,
+          minPrice: priceRange[0] === "" ? null : Number(priceRange[0]),
+          maxPrice: priceRange[1] === "" ? null : Number(priceRange[1]),
+        },
+      });
+
+      setProducts(res.data.items);
+      setTotalProducts(res.data.total);
     } catch (err) {
-      setAuthError(
-        err?.response?.data?.message || "Invalid username or password"
-      );
+      console.error("Product load failed", err);
+    }
+  }, [currentPage, search, categoryId, priceRange, pageSize]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts, currentPage, search, categoryId, priceRange]);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
+
+  const login = async (username, password) => {
+    try {
+      const res = await api.post("/Login/Login", {
+        userName: username,
+        password: password,
+      });
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", res.data.role);
+      localStorage.setItem("username", res.data.username);
+
+      setUser({
+        token: res.data.token,
+        role: res.data.role,
+        username: res.data.userName,
+      });
+
+      loadProducts();
+      setAuthError("");
+      return { ok: true, user: res.data };
+    } catch (err) {
+      setAuthError("Invalid username or password");
       return { ok: false };
     }
-  }, []);
+  };
 
-  const signup = useCallback(async (userName, email, password) => {
+  const signup = async (username, email, password) => {
     try {
-      await api.post("/User/Register", { userName, email, password });
+      await api.post("/User/Register", {
+        userName: username,
+        email,
+        password,
+      });
+
       setAuthError("");
       return { ok: true };
     } catch (err) {
-      setAuthError(err?.response?.data?.message || "Signup failed");
+      if (err.response && err.response.data) {
+        setAuthError(err.response.data);
+      } else {
+        setAuthError("Signup failed");
+      }
       return { ok: false };
     }
-  }, []);
+  };
 
-  const logout = useCallback(() => {
+  const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("username");
     setUser(null);
-    // reset filters
+
     setSearch("");
     setCategoryId("");
     setPriceRange([0, 100000]);
-  }, []);
+    setCurrentPage(1);
+    setProducts([]);
+  };
 
-  // Only auto-load on real app runs. In tests we often want to call loads explicitly to avoid act() warnings.
-  useEffect(() => {
-    if (process.env.NODE_ENV !== "test") {
-      loadCategories();
-      loadProducts();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const value = {
-    user,
-    setUser,
-    login,
-    signup,
-    logout,
-    categories,
-    products,
-    totalProducts,
-    loadCategories,
-    loadProducts,
-    deleteProduct,
-    search,
-    setSearch,
-    categoryId,
-    setCategoryId,
-    priceRange,
-    setPriceRange,
-    currentPage,
-    setCurrentPage,
-    pageSize,
-    setPageSize,
-    authError,
-    setAuthError,
+  const deleteProduct = async (id) => {
+    await api.delete(`/Product/Delete/${id}`);
+    loadProducts();
   };
 
   return (
-    <ProductContext.Provider value={value}>{children}</ProductContext.Provider>
+    <ProductContext.Provider
+      value={{
+        user,
+        setUser,
+        authError,
+        setAuthError,
+        products,
+        setProducts,
+        categories,
+        setCategories,
+        search,
+        setSearch,
+        categoryId,
+        setCategoryId,
+        priceRange,
+        setPriceRange,
+        currentPage,
+        setCurrentPage,
+        totalProducts,
+        setTotalProducts,
+        pageSize,
+        loadCategories,
+        loadProducts,
+        login,
+        signup,
+        logout,
+        deleteProduct,
+      }}
+    >
+      {children}
+    </ProductContext.Provider>
   );
 };
 

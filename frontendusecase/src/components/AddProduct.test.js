@@ -3,12 +3,10 @@ import AddProduct from "./AddProduct";
 import ProductContext from "../context/ProductContext";
 import api from "../api/api";
 
-// Mock API
 jest.mock("../api/api", () => ({
   post: jest.fn(),
 }));
 
-// Mock navigation
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
@@ -53,7 +51,7 @@ describe("AddProduct Component", () => {
       const callArg = api.post.mock.calls[0];
       expect(callArg[0]).toBe("/Product/Add");
 
-      expect(mockLoadProducts).toHaveBeenCalled(); // FIXED
+      expect(mockLoadProducts).toHaveBeenCalled(); 
       expect(mockNavigate).toHaveBeenCalledWith("/admin");
     });
   });

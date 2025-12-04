@@ -44,7 +44,6 @@ describe("Nav Component", () => {
   test("renders category dropdown", () => {
     renderNav();
 
-    // Ensure categories from context appear
     expect(screen.getByText("Electronics")).toBeInTheDocument();
     expect(screen.getByText("Clothing")).toBeInTheDocument();
   });
@@ -53,7 +52,6 @@ describe("Nav Component", () => {
     const user = userEvent.setup();
     renderNav();
 
-    // Use the first combobox (category dropdown)
     const selects = screen.getAllByRole("combobox");
     const categorySelect = selects[0];
 
@@ -65,8 +63,6 @@ describe("Nav Component", () => {
   test("price range change calls setPriceRange", async () => {
     const user = userEvent.setup();
     renderNav();
-
-    // Price dropdown is the second <select>
     const selects = screen.getAllByRole("combobox");
     const priceDropdown = selects[1];
 

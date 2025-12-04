@@ -6,7 +6,6 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 jest.mock("../api/api");
 
-// Mock URL.createObjectURL (required for preview)
 global.URL.createObjectURL = jest.fn(() => "preview-url");
 
 beforeEach(() => {
@@ -24,7 +23,6 @@ beforeEach(() => {
   api.put = jest.fn().mockResolvedValue({ data: {} });
 });
 
-// Helper renderer
 const renderEditProduct = (contextValues) => {
   return render(
     <ProductContext.Provider value={contextValues}>

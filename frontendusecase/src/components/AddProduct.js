@@ -28,7 +28,7 @@ const AddProduct = () => {
     await api.post("/Product/Add", formData);
 
     if (typeof loadProducts === "function") {
-      await loadProducts(); // 🔥 fix for failing test
+      await loadProducts();
     }
 
     alert("Product Added Successfully!");

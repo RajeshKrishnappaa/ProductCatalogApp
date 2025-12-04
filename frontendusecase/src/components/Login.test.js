@@ -2,8 +2,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Login from "./Login";
 import ProductContext from "../context/ProductContext";
-
-// Import mocked navigate from our manual mock
 import { mockNavigate } from "react-router-dom";
 
 describe("Login Component", () => {

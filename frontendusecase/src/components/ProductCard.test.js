@@ -1,4 +1,4 @@
-// src/components/ProductCard.test.js
+
 import { render, screen, fireEvent } from "@testing-library/react";
 import ProductCard from "./ProductCard";
 import ProductContext from "../context/ProductContext";

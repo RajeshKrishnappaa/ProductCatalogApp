@@ -1,4 +1,4 @@
-// src/components/ProductList.test.js
+
 import { render, screen } from "@testing-library/react";
 import ProductList from "./ProductList";
 import ProductContext from "../context/ProductContext";
