@@ -1,18 +1,24 @@
-﻿using Xunit;
-using ProdApp.Services.Implementations;
+﻿using Microsoft.Extensions.Configuration;
+using ProdApp.Data;
 using ProdApp.DTOS;
 using ProdApp.Models;
-using Microsoft.Extensions.Configuration;
+using ProdApp.Repositories.Implementations;
+using ProdApp.Services.Implementations;
+using Xunit;
 
 namespace ProdApp.Tests
 {
     public class AuthServiceTests
     {
+        private AuthService CreateService(ProdDbContext context, IConfiguration config)
+        {
+            var repo = new UserRepository(context);
+            return new AuthService(repo, config);
+        }
 
         [Fact]
         public async Task Login_ShouldReturnNull_ForWrongPassword()
         {
-            // Arrange
             var context = TestDbContextFactory.Create();
 
             context.Users.Add(new User
@@ -27,7 +33,7 @@ namespace ProdApp.Tests
 
             var settings = new Dictionary<string, string>
             {
-                {"JwtConfig:Key", "secret123456789secret"},
+                {"JwtConfig:Key", "mysuperstrongsecretkey1234567890ABC!@"},
                 {"JwtConfig:Issuer", "http://localhost"},
                 {"JwtConfig:Audience", "ProdApp"}
             };
@@ -36,24 +42,20 @@ namespace ProdApp.Tests
                 .AddInMemoryCollection(settings)
                 .Build();
 
-            var service = new AuthService(context, config);
+            var service = CreateService(context, config);
 
-            // Act
             var result = await service.LoginAsync(new LoginDTO
             {
                 UserName = "admin",
                 Password = "wrong"
             });
 
-            // Assert
             Assert.Null(result);
         }
-
 
         [Fact]
         public async Task Login_ShouldReturnToken_ForValidCredentials()
         {
-            // Arrange
             var context = TestDbContextFactory.Create();
 
             context.Users.Add(new User
@@ -68,7 +70,7 @@ namespace ProdApp.Tests
 
             var settings = new Dictionary<string, string>
             {
-                {"JwtConfig:Key", "secret123456789secret1234567yydeudfddfdddd"},
+                {"JwtConfig:Key", "THIS_IS_A_VERY_LONG_TEST_KEY_1234567890_ABCDE"},
                 {"JwtConfig:Issuer", "http://localhost"},
                 {"JwtConfig:Audience", "ProdApp"}
             };
@@ -77,16 +79,14 @@ namespace ProdApp.Tests
                 .AddInMemoryCollection(settings)
                 .Build();
 
-            var service = new AuthService(context, config);
+            var service = CreateService(context, config);
 
-            // Act
             var result = await service.LoginAsync(new LoginDTO
             {
                 UserName = "user",
                 Password = "pass"
             });
 
-            // Assert
             Assert.NotNull(result);
             Assert.NotEmpty(result.Token);
         }

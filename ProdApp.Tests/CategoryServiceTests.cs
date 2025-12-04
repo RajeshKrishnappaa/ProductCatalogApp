@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
+using ProdApp.Data;
 using ProdApp.DTOS;
+using ProdApp.Models;
+using ProdApp.Repositories.Implementations;
 using ProdApp.Services.Implementations;
 using Xunit;
 
@@ -14,11 +17,17 @@ namespace ProdApp.Tests
             _mapper = MapperHelper.GetMapper();
         }
 
+        private CategoryService CreateService(ProdDbContext context)
+        {
+            var repo = new CategoryRepository(context);
+            return new CategoryService(repo, context, _mapper);
+        }
+
         [Fact]
         public async Task CreateCategory_ShouldWork()
         {
             var context = TestDbContextFactory.Create();
-            var service = new CategoryService(context, _mapper);
+            var service = CreateService(context);
 
             var dto = new CategoryDTO { CategoryName = "Shoes" };
 
@@ -32,7 +41,7 @@ namespace ProdApp.Tests
         public async Task GetAll_ShouldReturnEmpty_WhenNoData()
         {
             var context = TestDbContextFactory.Create();
-            var service = new CategoryService(context, _mapper);
+            var service = CreateService(context);
 
             var result = await service.GetAllAsync();
 
@@ -43,7 +52,7 @@ namespace ProdApp.Tests
         public async Task DeleteCategory_ShouldReturnFalse_WhenNotFound()
         {
             var context = TestDbContextFactory.Create();
-            var service = new CategoryService(context, _mapper);
+            var service = CreateService(context);
 
             var result = await service.DeleteAsync(50);
 

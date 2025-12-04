@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
+using ProdApp.Data;
 using ProdApp.DTOS;
+using ProdApp.Models;
+using ProdApp.Repositories.Implementations;
 using ProdApp.Services.Implementations;
 using Xunit;
 
@@ -14,11 +17,17 @@ namespace ProdApp.Tests
             _mapper = MapperHelper.GetMapper();
         }
 
+        private UserService CreateService(ProdDbContext context)
+        {
+            var repo = new UserRepository(context);
+            return new UserService(repo, context, _mapper);
+        }
+
         [Fact]
         public async Task RegisterUser_ShouldCreateUser()
         {
             var context = TestDbContextFactory.Create();
-            var service = new UserService(context, _mapper);
+            var service = CreateService(context);
 
             var dto = new RegisterDTO
             {
@@ -34,21 +43,22 @@ namespace ProdApp.Tests
         }
 
         [Fact]
-        public async Task GetUserByName_ShouldReturnNull_IfNotFound()
+        public async Task GetByName_ShouldReturnNull_IfNotFound()
         {
             var context = TestDbContextFactory.Create();
-            var service = new UserService(context, _mapper);
+            var service = CreateService(context);
 
-            var result = await service.GetUserByNameAsync("Unknown");
+            var result = await service.GetByNameAsync("Unknown");
 
             Assert.Null(result);
         }
+
 
         [Fact]
         public async Task DeleteUser_ShouldReturnFalse_WhenNotFound()
         {
             var context = TestDbContextFactory.Create();
-            var service = new UserService(context, _mapper);
+            var service = CreateService(context);
 
             var deleted = await service.DeleteUserAsync(99);
 
