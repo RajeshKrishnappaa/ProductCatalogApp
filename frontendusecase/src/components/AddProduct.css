@@ -1,0 +1,75 @@
+.add-wrapper{
+    display:flex;
+    justify-content: center;
+    width:100%;
+    padding:2rem;
+}
+
+.add-card{
+    width:450px;
+    background: white;
+    padding: 2rem;
+    border-radius: 2px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+}
+
+.add-card h2{
+    text-align: center;
+    color:#3949ab;
+    margin-bottom: 1.5rem;
+}
+
+.add-form{
+    display:flex;
+    flex-direction: column;
+    gap:1rem;
+}
+
+.add-form input,
+.add-form textarea,
+.add-form select{
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    font-size: 1rem;
+}
+
+.add-form textarea{
+    height: 40px;
+}
+
+.btn-add-product{
+    padding:1rem;
+    background: green;
+    color:white;
+    font-weight: 500;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-add-product:hover{
+    background: darkgreen;
+}
+
+.back-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 2rem;
+  padding: 0.5rem 1rem;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  z-index: 10;
+}
+
+.back-btn:hover {
+  background: #0d47a1;
+}
+.back-btn-container {
+  position: relative;
+}
+

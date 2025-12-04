@@ -1,0 +1,140 @@
+.admin-wrapper {
+  padding: 2rem;
+  width: 100%;
+}
+
+.admin-section {
+  margin-bottom: 3rem;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-header h2 {
+  color: #3949ab;
+}
+
+.admin-product-actions {
+  display: flex;
+  justify-content:space-between;
+  width:100%;
+  margin-top: 0.5rem;
+}
+
+.admin-product-card {
+  width: 260px;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap : 0.8rem;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.btn-add {
+  background: #2e7d32;
+  color: white;
+  width:20%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-add:hover {
+  background: #1b5e20;
+}
+
+.btn-edit {
+  width: 40%;
+  padding: 0.7rem 0;              
+  font-size: 1rem;                
+  font-weight: 600;
+  border-radius: 8px;             
+  cursor: pointer;
+  background: #3949ab;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #01579b;
+}
+
+.btn-delete {
+  width: 40%;
+  padding: 0.7rem 0;              
+  font-size: 1rem;                
+  font-weight: 600;
+  border-radius: 8px;             
+  cursor: pointer;
+  background: #d32f2f;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #9a0007;
+}
+
+.btn-cancel {
+  background: gray;
+  color: white;
+  border-radius: 8px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.category-form {
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.category-form input {
+  padding: 0.6rem;
+  width: 250px;
+}
+
+.category-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.category-table th {
+  background: #476f95;
+  color: white;
+  padding: 0.7rem;
+}
+
+.category-table td {
+  padding: 0.7rem;
+  border: 1px solid #ddd;
+}
+
+.category-actions {
+  display: flex;
+  gap: 1rem;  
+  justify-content: center; 
+  align-items: center;
+}
+
